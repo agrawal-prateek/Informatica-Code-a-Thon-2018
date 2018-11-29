@@ -3,7 +3,6 @@
 
 using namespace std;
 
-/*******  All Required define Pre-Processors and typedef Constants *******/
 #define SCD(t) scanf("%d",&t)
 #define SCLD(t) scanf("%ld",&t)
 #define SCLLD(t) scanf("%lld",&t)
@@ -41,11 +40,8 @@ typedef unsigned long int uint32;
 typedef long long int int64;
 typedef unsigned long long int  uint64;
 
-/****** Template of some basic operations *****/
 template<typename T, typename U> inline void amin(T &x, U y) { if(y < x) x = y; }
 template<typename T, typename U> inline void amax(T &x, U y) { if(x < y) x = y; }
-
-/********************/
 
 #define MAXN 100000
 #define level 18
@@ -55,61 +51,43 @@ vector <int> tree[MAXN];
 int depth[MAXN];
 vector<int> sp[MAXN];
 int parent[MAXN][level];
- 
-// pre-compute the depth for each node and their
-// first parent(2^0th parent)
-// time complexity : O(n)
-void dfs(int cur, int prev)
-{
+
+void dfs(int cur, int prev){
     depth[cur] = depth[prev] + 1;
     sp[cur].assign(sp[prev].begin(),sp[prev].end());
     sp[cur].push_back(cur);
     parent[cur][0] = prev;
-    for (int i=0; i<tree[cur].size(); i++)
-    {
+    for (int i=0; i<tree[cur].size(); i++){
         if (tree[cur][i] != prev)
             dfs(tree[cur][i], cur);
     }
 }
- 
-// Dynamic Programming Sparse Matrix Approach
-// populating 2^i parent for each node
-// Time complexity : O(nlogn)
-void precomputeSparseMatrix(int n)
-{
-    for (int i=1; i<level; i++)
-    {
-        for (int node = 1; node <= n; node++)
-        {
+
+void precomputeSparseMatrix(int n){
+    for (int i=1; i<level; i++){
+        for (int node = 1; node <= n; node++){
             if (parent[node][i-1] != -1)
                 parent[node][i] =
                     parent[parent[node][i-1]][i-1];
         }
     }
 }
- 
-// Returning the LCA of u and v
-// Time complexity : O(log n)
-int lca(int u, int v)
-{
+
+int lca(int u, int v){
     if (depth[v] < depth[u])
         swap(u, v);
  
     int diff = depth[v] - depth[u];
  
-    // Step 1 of the pseudocode
     for (int i=0; i<level; i++)
         if ((diff>>i)&1)
             v = parent[v][i];
  
-    // now depth[u] == depth[v]
     if (u == v)
         return u;
  
-    // Step 2 of the pseudocode
     for (int i=level-1; i>=0; i--)
-        if (parent[u][i] != parent[v][i])
-        {
+        if (parent[u][i] != parent[v][i]){
             u = parent[u][i];
             v = parent[v][i];
         }
@@ -117,65 +95,40 @@ int lca(int u, int v)
     return parent[u][0];
 }
 
-void addEdge(int u,int v)
-{
+void addEdge(int u,int v){
     tree[u].push_back(v);
     tree[v].push_back(u);
 }
 
-/********** Main()  function **********/
-int main()
-{
+int main(){
 	ios_base::sync_with_stdio(false);
 	cin.tie(NULL); 
-
-	//freopen("input.in", "r", stdin);
-	//freopen("output.txt", "w", stdout);
-
 	uint64 N,M;
-
 	cin>>N>>M;
-
 	uint64 u,v;
+    memset(parent,-1,sizeof(parent));
 
-		memset(parent,-1,sizeof(parent));
-
-	for (int i = 0; i < N-1; ++i)
-	{
+	for (int i = 0; i < N-1; ++i){
 		cin>>u>>v;
 		addEdge(u,v);
 	}
 
 	depth[0]=0;
-
 	dfs(N,0);
-
-
 	precomputeSparseMatrix(N);
 	
 	int count[N+1];
-	for(int i=0;i<=N;i++)
-	{
+	for(int i=0;i<=N;i++){
 	    count[i]=0;
 	}
-
-
     int a,b;
-	for (int i = 0; i < M; ++i)
-	{
-		cin>>a>>b;
-        //cout<<"Case#1: "<<depth[a]<<" "<<depth[b]<<" "<<lca(a,b);
-		//cout<<depth[a]+depth[b]-2*depth[lca(a,b)];
-		
-		//bool flag=false;
-		
-		for(int i=sp[lca(a,b)].size()-1;i<sp[a].size();i++)
-		{
+	for (int i = 0; i < M; ++i){
+		cin>>a>>b;		
+		for(int i=sp[lca(a,b)].size()-1;i<sp[a].size();i++){
 		   count[sp[a][i]]++;
 		}
 		
-		for(int i=sp[lca(a,b)].size();i<sp[b].size();i++)
-		{
+		for(int i=sp[lca(a,b)].size();i<sp[b].size();i++){
 		    count[sp[b][i]]++;
 		}
 		
@@ -183,15 +136,9 @@ int main()
 	}
 	
 	int mx=0;
-
-    for(int i=0;i<=N;i++)
-    {
+    for(int i=0;i<=N;i++){
         mx=max(mx,count[i]);
     }
-    
     cout<<mx;
-
-
 	return 0;
 }
-/********  Main() Ends Here *************/
